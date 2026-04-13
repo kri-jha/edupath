@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admission Predictor - EduPath AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>auth.checkAuthAndRedirect();</script>
+</head>
+<body style="background:var(--bg);">
+
+    <nav class="navbar" style="background: white; border-bottom: 1px solid #eee;">
+        <div class="logo"><a href="dashboard.html">← Dashboard</a> &nbsp; <b style="font-size:1.2rem;">Predictor 📊</b></div>
+    </nav>
+
+    <div class="container py-12" style="margin-top: 70px;">
+        <div class="grid grid-cols-2 gap-6">
+            
+            <div class="card">
+                <h3>Check Your Chances</h3>
+                <form id="predictForm" class="mt-4">
+                    <div class="mb-4">
+                        <label>GPA (out of 10) : <span id="gpaVal">8.5</span></label>
+                        <input type="range" id="gpa" min="5" max="10" step="0.1" value="8.5" oninput="document.getElementById('gpaVal').innerText=this.value" required>
+                    </div>
+                    <div class="mb-4">
+                        <label>IELTS/TOEFL Band : <span id="ieltsVal">7.0</span></label>
+                        <input type="range" id="ielts" min="5" max="9" step="0.5" value="7.0" oninput="document.getElementById('ieltsVal').innerText=this.value" required>
+                    </div>
+                    <div class="mb-4">
+                        <label>Work Experience (Years) : <span id="workVal">2</span></label>
+                        <input type="range" id="work" min="0" max="10" step="1" value="2" oninput="document.getElementById('workVal').innerText=this.value" required>
+                    </div>
+                    <div class="mb-4">
+                        <label>SOP Rating (1-5 stars) : <span id="sopVal">4</span></label>
+                        <input type="range" id="sop" min="1" max="5" step="1" value="4" oninput="document.getElementById('sopVal').innerText=this.value" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full">Predict My Chances</button>
+                </form>
+            </div>
+
+            <div class="card" id="resultsCard" style="display:none; flex-direction:column; justify-content:center; text-align:center;">
+                <h3 class="mb-4">Prediction Result</h3>
+                <div style="width: 150px; height: 150px; border-radius: 50%; border: 15px solid var(--primary); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; margin: 0 auto; color: var(--text-main);" id="chanceCircle">
+                    <span id="chance">--</span>%
+                </div>
+                <div style="margin-top: 25px; padding: 15px; background: var(--light); border-radius: 8px;">
+                    <b>💡 AI Tip:</b> <span id="tip">--</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const p = auth.getProfile();
+            if(p) {
+                document.getElementById("gpa").value = p.gpa;
+                document.getElementById('gpaVal').innerText = p.gpa;
+            }
+        });
+
+        document.getElementById("predictForm").addEventListener("submit", async(e) => {
+            e.preventDefault();
+            const payload = {
+                gpa: parseFloat(document.getElementById("gpa").value),
+                english_score: parseFloat(document.getElementById("ielts").value),
+                work_exp: parseFloat(document.getElementById("work").value),
+                sop_score: parseFloat(document.getElementById("sop").value)
+            };
+
+            document.getElementById('resultsCard').style.display = 'flex';
+            
+            const res = await api.predictAdmission(payload);
+            
+            const circle = document.getElementById("chanceCircle");
+            document.getElementById("chance").innerText = res.probability;
+            
+            if(res.probability >= 70) circle.style.borderColor = 'var(--success)';
+            else if(res.probability >= 40) circle.style.borderColor = 'var(--warning)';
+            else circle.style.borderColor = 'var(--danger)';
+
+            document.getElementById("tip").innerText = res.tips;
+        });
+    </script>
+</body>
+</html>

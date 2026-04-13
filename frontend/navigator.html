@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Navigator - EduPath AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>auth.checkAuthAndRedirect();</script>
+</head>
+<body style="background:var(--bg);">
+
+    <nav class="navbar" style="background: white; border-bottom: 1px solid #eee;">
+        <div class="logo"><a href="dashboard.html">← Dashboard</a> &nbsp; <b style="font-size:1.2rem;">Navigator 🎓</b></div>
+    </nav>
+
+    <div class="container py-12" style="margin-top: 70px;">
+        <div class="text-center mb-8">
+            <h2>Recommended Universities for You</h2>
+            <p class="text-muted">Based on your target and profile</p>
+        </div>
+
+        <!-- Filters -->
+        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:30px; flex-wrap:wrap;" id="filters">
+            <button class="btn btn-primary" onclick="loadUniversities('All')">All Matches</button>
+            <button class="btn btn-outline" onclick="loadUniversities('USA')">USA</button>
+            <button class="btn btn-outline" onclick="loadUniversities('UK')">UK</button>
+            <button class="btn btn-outline" onclick="loadUniversities('Canada')">Canada</button>
+            <button class="btn btn-outline" onclick="loadUniversities('Germany')">Germany</button>
+            <button class="btn btn-outline" onclick="loadUniversities('Australia')">Australia</button>
+        </div>
+
+        <div id="loader" class="grid grid-cols-2 gap-6">
+            <div class="card skeleton" style="height:200px;"></div>
+            <div class="card skeleton" style="height:200px;"></div>
+        </div>
+
+        <div id="uniGrid" class="grid grid-cols-2 gap-6" style="display:none;"></div>
+    </div>
+
+    <script>
+        const profile = auth.getProfile();
+        
+        async function loadUniversities(filterCountry = 'All') {
+            document.getElementById('loader').style.display = 'grid';
+            document.getElementById('uniGrid').style.display = 'none';
+
+            // Update active filter button
+            document.querySelectorAll('#filters button').forEach(b => {
+                b.className = b.innerText.includes(filterCountry) ? 'btn btn-primary' : 'btn btn-outline';
+            });
+
+            const payload = {
+                gpa: profile.gpa,
+                target_country: filterCountry === 'All' ? 'All' : filterCountry,
+                target_course: profile.target_course
+            };
+
+            const data = await api.recommendUniversities(payload);
+            
+            const grid = document.getElementById('uniGrid');
+            grid.innerHTML = '';
+            
+            if(data.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center;">No universities found for this filter.</div>';
+            } else {
+                data.forEach(u => {
+                    const matchColor = u.match_percent > 80 ? 'var(--success)' : (u.match_percent > 50 ? 'var(--warning)' : 'var(--danger)');
+                    
+                    grid.innerHTML += `
+                        <div class="card">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <div>
+                                    <h3>${u.name} <span style="font-size:0.8em; font-weight:normal;">(${u.country})</span></h3>
+                                    <p class="text-muted" style="font-size:0.9rem;">Rank: #${u.ranking} | Rate: ${u.acceptance_rate}%</p>
+                                </div>
+                                <div style="background:${matchColor}; color:white; padding:5px 10px; border-radius:20px; font-weight:bold; font-size:0.9rem;">
+                                    ${u.match_percent}% Match
+                                </div>
+                            </div>
+                            <p style="margin: 15px 0;">${u.description}</p>
+                            <div style="margin-bottom:15px; font-weight:600;">
+                                💰 Total Cost: ${utils.formatCurrency(u.annual_cost_inr)}
+                            </div>
+                            <div class="flex gap-4">
+                                <a href="https://${u.website}" target="_blank" class="btn btn-outline" style="width:100%;">Visit Website</a>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('loader').style.display = 'none';
+            grid.style.display = 'grid';
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadUniversities(profile.target_country || 'All');
+        });
+    </script>
+</body>
+</html>

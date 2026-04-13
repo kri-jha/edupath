@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPath AI - Profile Setup</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <style>
+        .step { display: none; }
+        .step.active { display: block; }
+        .progress-bar { height: 8px; background: #eee; border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); width: 33%; transition: width 0.3s; }
+    </style>
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+
+    <div class="card glass" style="width: 100%; max-width: 500px;">
+        <div class="text-center mb-4">
+            <h2>Let's build your profile</h2>
+            <p class="text-muted">Step <span id="step-num">1</span> of 3</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="p-bar"></div>
+        </div>
+
+        <form id="onboardingForm">
+            <!-- Step 1 -->
+            <div class="step active" id="step1">
+                <div class="mb-4">
+                    <label>Full Name</label>
+                    <input type="text" id="name" required placeholder="John Doe">
+                </div>
+                <div class="mb-4">
+                    <label>Email Address</label>
+                    <input type="email" id="email" required placeholder="john@example.com">
+                </div>
+                <div class="mb-4">
+                    <label>Current Degree</label>
+                    <input type="text" id="degree" required placeholder="B.Tech Computer Science">
+                </div>
+                <div class="mb-4">
+                    <label>Current GPA (out of 10)</label>
+                    <input type="number" step="0.1" id="gpa" required placeholder="8.5">
+                </div>
+                <button type="button" class="btn btn-primary w-full" onclick="nextStep(2)">Next Step</button>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step" id="step2">
+                <div class="mb-4">
+                    <label>Target Country</label>
+                    <select id="targetCountry" required>
+                        <option value="USA">USA</option>
+                        <option value="UK">UK</option>
+                        <option value="Canada">Canada</option>
+                        <option value="Germany">Germany</option>
+                        <option value="Australia">Australia</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label>Target Course</label>
+                    <select id="targetCourse" required>
+                        <option value="MS CS">MS Computer Science</option>
+                        <option value="MS Data Science">MS Data Science</option>
+                        <option value="MBA">MBA</option>
+                        <option value="Engineering Management">Engineering Management</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label>Estimated Budget (INR)</label>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="range" id="budgetRange" min="1000000" max="6000000" step="500000" value="3000000" oninput="budgetLabel.innerText = this.value">
+                        <span style="font-weight:bold;">₹<span id="budgetLabel">3000000</span></span>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <button type="button" class="btn btn-outline w-full" onclick="nextStep(1)">Back</button>
+                    <button type="button" class="btn btn-primary w-full" onclick="nextStep(3)">Next Step</button>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step" id="step3">
+                <div class="mb-4">
+                    <label>Target Timeline</label>
+                    <input type="month" id="timeline" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-full" id="submitBtn">Complete Profile Setup</button>
+                <div class="mt-4 flex gap-4">
+                    <button type="button" class="btn btn-outline w-full" onclick="nextStep(2)">Back</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function nextStep(n) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + n).classList.add('active');
+            document.getElementById('step-num').innerText = n;
+            document.getElementById('p-bar').style.width = (n * 33.3) + "%";
+        }
+
+        document.getElementById("onboardingForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("submitBtn");
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            const payload = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                degree: document.getElementById('degree').value,
+                gpa: parseFloat(document.getElementById('gpa').value),
+                target_country: document.getElementById('targetCountry').value,
+                target_course: document.getElementById('targetCourse').value,
+                budget: parseInt(document.getElementById('budgetRange').value),
+                timeline: document.getElementById('timeline').value
+            };
+
+            const res = await api.saveProfile(payload);
+            
+            if(res.student_id) {
+                auth.saveStudentId(res.student_id);
+                auth.saveProfile(payload);
+                window.location.href = "dashboard.html";
+            } else {
+                alert("Error saving profile");
+                btn.innerText = "Complete Profile Setup";
+                btn.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+</html>

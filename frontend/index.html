@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPath AI - Start Your Study Abroad Journey</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/auth.js" defer></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const nav = document.querySelector(".navbar");
+            window.addEventListener("scroll", () => {
+                if (window.scrollY > 50) nav.classList.add("scrolled");
+                else nav.classList.remove("scrolled");
+            });
+
+            // If already logged in, change CTA to Dashboard
+            if(auth.isLoggedIn()) {
+                const startBtn = document.getElementById("startBtn");
+                startBtn.innerText = "Go to Dashboard →";
+                startBtn.href = "dashboard.html";
+            }
+        });
+    </script>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo"><h2>EduPath AI 🎓</h2></div>
+        <div class="nav-links main-nav">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="onboarding.html" class="btn btn-outline" style="padding: 8px 16px;">Login</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Your AI-Powered Study Abroad Companion</h1>
+            <p>From university selection to education loan — we guide every step.</p>
+            <a href="onboarding.html" id="startBtn" class="btn btn-primary" style="font-size: 1.2rem; padding: 15px 30px;">Start Your Journey →</a>
+        </div>
+    </section>
+
+    <section id="features" class="py-12" style="background: white;">
+        <div class="container text-center">
+            <h2 class="mb-4" style="font-size: 2.5rem;">Everything you need in one place</h2>
+            <div class="grid grid-cols-4 gap-6 mt-8">
+                <div class="card glass">
+                    <div class="feature-icon">🎓</div>
+                    <h3>Career Navigator</h3>
+                    <p class="text-muted mt-4">Discover the best universities that match your profile.</p>
+                </div>
+                <div class="card glass">
+                    <div class="feature-icon">💰</div>
+                    <h3>ROI Calculator</h3>
+                    <p class="text-muted mt-4">Calculate your return on investment before making a decision.</p>
+                </div>
+                <div class="card glass">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI Mentor</h3>
+                    <p class="text-muted mt-4">Chat with Claude, your personal study abroad counselor.</p>
+                </div>
+                <div class="card glass">
+                    <div class="feature-icon">🏦</div>
+                    <h3>Loan Estimator</h3>
+                    <p class="text-muted mt-4">Check eligibility and EMI for top educational loans instantly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="py-12">
+        <div class="container text-center">
+            <h2 class="mb-4" style="font-size: 2.5rem;">How It Works</h2>
+            <div class="grid grid-cols-3 gap-6 mt-8" style="grid-template-columns: repeat(3, 1fr) !important;">
+                <div class="card">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-weight: bold;">1</div>
+                    <h3>Setup Profile</h3>
+                    <p class="text-muted mt-4">Tell us about your background, budget, and target.</p>
+                </div>
+                <div class="card">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-weight: bold;">2</div>
+                    <h3>Get Recommendations</h3>
+                    <p class="text-muted mt-4">Our AI provides perfect matches and calculates ROI.</p>
+                </div>
+                <div class="card">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-weight: bold;">3</div>
+                    <h3>Apply for Loan</h3>
+                    <p class="text-muted mt-4">Finalize your funding effortlessly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer style="background: var(--dark); color: white; text-align: center; padding: 40px 20px;">
+        <div class="container">
+            <h2>EduPath AI 🎓</h2>
+            <p style="margin-top: 10px; color: #999;">Hackathon Project 2025. Powered by FastAPI & Anthropic Claude.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

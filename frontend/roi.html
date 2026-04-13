@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROI Calculator - EduPath AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>auth.checkAuthAndRedirect();</script>
+</head>
+<body style="background:var(--bg);">
+
+    <nav class="navbar" style="background: white; border-bottom: 1px solid #eee;">
+        <div class="logo"><a href="dashboard.html">← Dashboard</a> &nbsp; <b style="font-size:1.2rem;">ROI Calculator 💰</b></div>
+    </nav>
+
+    <div class="container py-12" style="margin-top: 70px;">
+        <div class="grid grid-cols-2 gap-6">
+            
+            <div class="card">
+                <h3>Enter Details</h3>
+                <form id="roiForm" class="mt-4">
+                    <div class="mb-4">
+                        <label>Total Course Cost (INR)</label>
+                        <input type="number" id="cost" required>
+                    </div>
+                    <div class="mb-4">
+                        <label>Target Country</label>
+                        <select id="country" required>
+                            <option value="USA">USA</option>
+                            <option value="UK">UK</option>
+                            <option value="Canada">Canada</option>
+                            <option value="Germany">Germany</option>
+                            <option value="Australia">Australia</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full">Calculate ROI</button>
+                </form>
+            </div>
+
+            <div class="card" id="resultsCard" style="display:none; flex-direction:column; justify-content:center;">
+                <h3 class="mb-4 text-center">Your Projection</h3>
+                <div style="background:var(--light); padding:15px; border-radius:8px; margin-bottom:20px; text-align:center;">
+                    <p>Break-even Point</p>
+                    <h2 id="breakeven" style="color:var(--success);">2.5 Years</h2>
+                </div>
+                <div style="margin-bottom:20px; text-align:center;">
+                    <p>10-Year Net Gain</p>
+                    <h3 id="gain" style="color:var(--primary);">₹5,00,00,000</h3>
+                </div>
+                <div>
+                    <canvas id="roiChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let myChart = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const p = auth.getProfile();
+            if(p) {
+                document.getElementById("cost").value = p.budget;
+                document.getElementById("country").value = p.target_country;
+            }
+        });
+
+        document.getElementById("roiForm").addEventListener("submit", async(e) => {
+            e.preventDefault();
+            const payload = {
+                course_cost: parseFloat(document.getElementById("cost").value),
+                country: document.getElementById("country").value,
+                course_type: "MS"
+            };
+
+            document.getElementById('resultsCard').style.display = 'flex';
+            
+            const res = await api.calculateROI(payload);
+            
+            document.getElementById("breakeven").innerText = `${res.breakeven_years} Years`;
+            document.getElementById("gain").innerText = utils.formatCurrency(res.total_gain_10y);
+
+            if(myChart) myChart.destroy();
+            
+            const ctx = document.getElementById('roiChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Year 1', 'Year 3', 'Year 5'],
+                    datasets: [{
+                        label: 'Projected Salary (INR)',
+                        data: [res.year1_salary, res.year3_salary, res.year5_salary],
+                        backgroundColor: 'rgba(37, 99, 235, 0.5)',
+                        borderColor: 'rgb(37, 99, 235)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

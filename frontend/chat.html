@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mentor - EduPath AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script>auth.checkAuthAndRedirect();</script>
+</head>
+<body style="background:var(--light);">
+
+    <nav class="navbar" style="background: white; border-bottom: 1px solid #eee;">
+        <div class="logo"><a href="dashboard.html">← Back</a> &nbsp; <b style="font-size:1.2rem;">EduPath AI 🤖 <span style="color:var(--success); font-size:0.8em;">● Online</span></b></div>
+    </nav>
+
+    <div class="container chat-container" style="margin-top: 70px; max-width:800px; background:white; padding:0; box-shadow:0 0 20px rgba(0,0,0,0.05);">
+        
+        <div class="chat-messages" id="chatBox">
+            <div class="text-center text-muted" style="margin-bottom:20px; font-size:0.9em;">Chat history is secured</div>
+            
+            <div class="bubble ai">
+                Hello! I'm EduPath AI. I can help you with university selection, visa processes, and education loan guidance. What would you like to know today?
+            </div>
+        </div>
+
+        <div style="padding: 10px 20px; background:#fafafa; display:flex; gap:10px; overflow-x:auto; border-top:1px solid #eee;" id="suggestedChips">
+            <button class="btn btn-outline" style="padding:5px 15px; white-space:nowrap; border-radius:20px; font-size:0.9em;" onclick="sendMsg('Which country is best for MS CS? 🎓')">Which country is best for MS CS? 🎓</button>
+            <button class="btn btn-outline" style="padding:5px 15px; white-space:nowrap; border-radius:20px; font-size:0.9em;" onclick="sendMsg('How to get education loan in India? 💰')">How to get education loan? 💰</button>
+            <button class="btn btn-outline" style="padding:5px 15px; white-space:nowrap; border-radius:20px; font-size:0.9em;" onclick="sendMsg('What GPA do I need for US universities? 📊')">US University GPA? 📊</button>
+        </div>
+
+        <form class="chat-input-area" id="chatForm">
+            <input type="text" id="chatInput" placeholder="Message EduPath AI..." style="margin:0; border:1px solid #ddd; border-radius:20px; padding:10px 20px; flex-grow:1;" autocomplete="off" required>
+            <button type="submit" class="btn btn-primary" style="border-radius:20px; padding:10px 20px;">Send</button>
+        </form>
+    </div>
+
+    <script>
+        let chatHistory = [];
+        const studentId = auth.getStudentId();
+        const chatBox = document.getElementById("chatBox");
+
+        async function loadHistory() {
+            const res = await api.getChatHistory(studentId);
+            if(res.history && res.history.length > 0) {
+                chatBox.innerHTML = '';
+                res.history.forEach(msg => {
+                    appendBubble(msg.message, msg.role);
+                    chatHistory.push({role: msg.role, message: msg.message});
+                });
+                scrollToBottom();
+            }
+        }
+
+        function appendBubble(text, role) {
+            const div = document.createElement("div");
+            div.className = `bubble ${role === 'user' ? 'user' : 'ai'}`;
+            div.innerHTML = text.replace(/\n/g, '<br>');
+            chatBox.appendChild(div);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        window.sendMsg = function(msg) {
+            document.getElementById("chatInput").value = msg;
+            document.getElementById("chatForm").dispatchEvent(new Event("submit"));
+            document.getElementById("suggestedChips").style.display = 'none';
+        }
+
+        document.getElementById("chatForm").addEventListener("submit", async(e) => {
+            e.preventDefault();
+            const input = document.getElementById("chatInput");
+            const msg = input.value.trim();
+            if(!msg) return;
+
+            input.value = "";
+            appendBubble(msg, "user");
+            
+            document.getElementById("suggestedChips").style.display = 'none';
+
+            const typing = document.createElement("div");
+            typing.className = "bubble ai";
+            typing.id = "typingInd";
+            typing.innerHTML = "<i>Thinking...</i>";
+            chatBox.appendChild(typing);
+            scrollToBottom();
+
+            const res = await api.chat({
+                message: msg,
+                student_id: parseInt(studentId),
+                chat_history: chatHistory
+            });
+
+            document.getElementById("typingInd").remove();
+
+            if(res.message) {
+                appendBubble(res.message, "ai");
+                chatHistory.push({role: "user", message: msg});
+                chatHistory.push({role: "assistant", message: res.message});
+            } else {
+                appendBubble("Sorry, I encountered an error. Please try again.", "ai");
+            }
+        });
+
+        loadHistory();
+    </script>
+</body>
+</html>

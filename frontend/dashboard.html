@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - EduPath AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>auth.checkAuthAndRedirect();</script>
+</head>
+<body>
+
+    <nav class="navbar" style="background: white; border-bottom: 1px solid #eee;">
+        <div class="logo"><h2>EduPath AI 🎓</h2></div>
+        <div class="nav-links">
+            <a href="dashboard.html" style="color:var(--primary); font-weight:700;">Dashboard</a>
+            <a href="navigator.html">Navigator</a>
+            <a href="roi.html">ROI Calculator</a>
+            <a href="predictor.html">Predictor</a>
+            <a href="chat.html">AI Chat</a>
+            <a href="loan.html">Loan</a>
+            <button onclick="auth.logout()" class="btn btn-outline" style="padding: 5px 10px;">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container py-12" style="margin-top: 70px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+            <h1>Welcome back, <span id="userName">Student</span>! 👋</h1>
+            <div style="background: white; padding: 10px 20px; border-radius: 20px; font-weight:600; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                Target: <span id="userTarget" style="color:var(--primary);"></span>
+            </div>
+        </div>
+        
+        <p class="text-muted mt-4">Here is your study abroad mission control.</p>
+
+        <div class="grid grid-cols-4 gap-6 mt-8">
+            <a href="navigator.html" class="card" style="text-align:center; padding:40px 20px;">
+                <div class="feature-icon">🎓</div>
+                <h3>Career Navigator</h3>
+                <p class="mt-4 text-muted">Find perfect universities.</p>
+            </a>
+            <a href="chat.html" class="card" style="text-align:center; padding:40px 20px;">
+                <div class="feature-icon">🤖</div>
+                <h3>AI Mentor Chat</h3>
+                <p class="mt-4 text-muted">Get expert guidance 24/7.</p>
+            </a>
+            <a href="predictor.html" class="card" style="text-align:center; padding:40px 20px;">
+                <div class="feature-icon">📊</div>
+                <h3>Admission Predictor</h3>
+                <p class="mt-4 text-muted">Check your chances.</p>
+            </a>
+            <a href="loan.html" class="card" style="text-align:center; padding:40px 20px;">
+                <div class="feature-icon">🏦</div>
+                <h3>Loan Estimator</h3>
+                <p class="mt-4 text-muted">Calculate bank offers.</p>
+            </a>
+            <a href="roi.html" class="card" style="text-align:center; padding:40px 20px;">
+                <div class="feature-icon">💰</div>
+                <h3>ROI Calculator</h3>
+                <p class="mt-4 text-muted">See your future returns.</p>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const profile = auth.getProfile();
+            if(profile && profile.name) {
+                document.getElementById("userName").innerText = profile.name.split(' ')[0];
+                document.getElementById("userTarget").innerText = `${profile.target_country} - ${profile.target_course}`;
+            }
+        });
+    </script>
+</body>
+</html>
