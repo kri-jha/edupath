@@ -39,7 +39,7 @@ async def get_groq_response(messages: list, student_context: dict = None):
         groq_messages.append({"role": msg["role"], "content": msg["content"]})
         
     payload = {
-        "model": "llama3-8b-8192",
+        "model": "llama-3.3-70b-versatile",
         "messages": groq_messages
     }
     
