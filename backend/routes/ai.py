@@ -10,8 +10,8 @@ load_dotenv()
 
 router = APIRouter()
 
-CLAUDE_API_URL = "https://api.anthropic.com/v1/messages"
-CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 SYSTEM_PROMPT = """You are EduPath AI, a friendly and knowledgeable mentor 
 helping Indian students with study abroad decisions. You help with:
@@ -19,7 +19,7 @@ helping Indian students with study abroad decisions. You help with:
 - Visa processes and requirements  
 - Education loan guidance in India
 - SOP and application tips
-- Career prospects after graduation
+- Career prospects
 Be concise (max 3-4 sentences), warm, and encouraging. 
 Always respond in simple English that Indian students can understand."""
 
@@ -28,54 +28,55 @@ class ChatMessage(BaseModel):
     student_id: int
     chat_history: Optional[List[dict]] = []
 
-async def get_claude_response(messages: list, student_context: dict = None):
+async def get_groq_response(messages: list, student_context: dict = None):
     context = f"\nStudent Profile: GPA {student_context.get('gpa')}, Target: {student_context.get('target_country')}, Course: {student_context.get('target_course')}" if student_context else ""
     
-    headers = {
-        "Content-Type": "application/json",
-        "x-api-key": CLAUDE_API_KEY or "fallback-key-missing",
-        "anthropic-version": "2023-06-01"
+    # Format messages for Groq
+    groq_messages = [
+        {"role": "system", "content": SYSTEM_PROMPT + context}
+    ]
+    for msg in messages:
+        groq_messages.append({"role": msg["role"], "content": msg["content"]})
+        
+    payload = {
+        "model": "llama3-8b-8192",
+        "messages": groq_messages
     }
     
-    payload = {
-        "model": "claude-3-5-sonnet-20240620",
-        "max_tokens": 1000,
-        "system": SYSTEM_PROMPT + context,
-        "messages": messages
+    api_key = GROQ_API_KEY or "no-key"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
     }
     
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(CLAUDE_API_URL, json=payload, headers=headers)
+            response = await client.post(GROQ_API_URL, json=payload, headers=headers)
             data = response.json()
-            if "content" in data:
-                return data["content"][0]["text"]
+            if "choices" in data and len(data["choices"]) > 0:
+                return data["choices"][0]["message"]["content"]
             else:
-                return f"Error from Claude: {data.get('error', 'Unknown error')}"
+                return f"Error from AI: {data.get('error', 'Unknown error')}"
         except Exception as e:
             return f"System error calling AI: {str(e)}"
 
 @router.post("/")
 async def chat_with_ai(chat: ChatMessage):
-    # Get user context
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM students WHERE id = ?', (chat.student_id,))
     student = cursor.fetchone()
     student_ctx = dict(student) if student else None
     
-    # Save user message to DB
     cursor.execute('INSERT INTO chat_history (student_id, role, message) VALUES (?, ?, ?)', (chat.student_id, 'user', chat.message))
     
-    # Format messages for Claude
     formatted_messages = []
     for msg in chat.chat_history:
         formatted_messages.append({"role": msg["role"], "content": msg["message"]})
     formatted_messages.append({"role": "user", "content": chat.message})
     
-    ai_response = await get_claude_response(formatted_messages, student_ctx)
+    ai_response = await get_groq_response(formatted_messages, student_ctx)
     
-    # Save bot message to DB
     cursor.execute('INSERT INTO chat_history (student_id, role, message) VALUES (?, ?, ?)', (chat.student_id, 'assistant', ai_response))
     conn.commit()
     conn.close()
