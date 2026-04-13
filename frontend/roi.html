@@ -11,48 +11,59 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>auth.checkAuthAndRedirect();</script>
 </head>
-<body style="background:var(--bg);">
+<body>
 
-    <nav class="navbar" style="background: white; border-bottom: 1px solid #eee;">
-        <div class="logo"><a href="dashboard.html">← Dashboard</a> &nbsp; <b style="font-size:1.2rem;">ROI Calculator 💰</b></div>
+    <nav class="navbar">
+        <div class="logo"><a href="dashboard.html" style="color: var(--text-muted); padding-right:15px; border-right: 1px solid var(--glass-border);">← Back</a> &nbsp; <b style="font-size:1.4rem;">Financial ROI Projection 📈</b></div>
     </nav>
 
-    <div class="container py-12" style="margin-top: 70px;">
+    <div class="container py-12" style="margin-top: 50px;">
         <div class="grid grid-cols-2 gap-6">
             
             <div class="card">
-                <h3>Enter Details</h3>
+                <h3 style="font-size:1.8rem; margin-bottom: 20px;">Input Fiscal Data</h3>
                 <form id="roiForm" class="mt-4">
                     <div class="mb-4">
-                        <label>Total Course Cost (INR)</label>
-                        <input type="number" id="cost" required>
+                        <label>Total Academic Expenditure (INR)</label>
+                        <input type="number" id="cost" placeholder="e.g. 4000000" style="padding: 16px;" required>
                     </div>
-                    <div class="mb-4">
-                        <label>Target Country</label>
-                        <select id="country" required>
-                            <option value="USA">USA</option>
-                            <option value="UK">UK</option>
+                    <div class="mb-4 mt-8">
+                        <label>Target Destination Matrix</label>
+                        <select id="country" style="padding: 16px; margin-top:10px;" required>
+                            <option value="USA">United States of America</option>
+                            <option value="UK">United Kingdom</option>
                             <option value="Canada">Canada</option>
                             <option value="Germany">Germany</option>
                             <option value="Australia">Australia</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary w-full">Calculate ROI</button>
+                    <button type="submit" class="btn btn-primary w-full mt-8" style="padding:16px; font-size:1.1rem;">Generate ROI Projection</button>
+                    
+                    <div class="mt-8 text-center">
+                        <p class="text-muted" style="font-size:0.9rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:5px;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            Calculations are based on 10-year historical wage growth data.
+                        </p>
+                    </div>
                 </form>
             </div>
 
             <div class="card" id="resultsCard" style="display:none; flex-direction:column; justify-content:center;">
-                <h3 class="mb-4 text-center">Your Projection</h3>
-                <div style="background:var(--light); padding:15px; border-radius:8px; margin-bottom:20px; text-align:center;">
-                    <p>Break-even Point</p>
-                    <h2 id="breakeven" style="color:var(--success);">2.5 Years</h2>
+                <h3 class="mb-8" style="font-size: 1.5rem; text-align:center;">10-Year Financial Trajectory</h3>
+                
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); padding:20px; border-radius:16px; text-align:center;">
+                        <p style="color:var(--text-muted); font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">Breakeven Point</p>
+                        <h2 id="breakeven" style="color:var(--success); font-size:2.2rem;">2.5 Yrs</h2>
+                    </div>
+                    <div style="background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.2); padding:20px; border-radius:16px; text-align:center;">
+                        <p style="color:var(--text-muted); font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">Net Cumulative Gain</p>
+                        <h3 id="gain" style="color:var(--secondary); font-size:1.8rem; margin-top:5px;">₹5 Cr</h3>
+                    </div>
                 </div>
-                <div style="margin-bottom:20px; text-align:center;">
-                    <p>10-Year Net Gain</p>
-                    <h3 id="gain" style="color:var(--primary);">₹5,00,00,000</h3>
-                </div>
-                <div>
-                    <canvas id="roiChart" width="400" height="200"></canvas>
+
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border);">
+                    <canvas id="roiChart" width="400" height="220"></canvas>
                 </div>
             </div>
 
@@ -78,31 +89,49 @@
                 course_type: "MS"
             };
 
-            document.getElementById('resultsCard').style.display = 'flex';
+            const rc = document.getElementById('resultsCard');
+            rc.style.display = 'flex';
+            rc.style.animation = "fadeIn 0.6s ease forwards";
             
             const res = await api.calculateROI(payload);
             
-            document.getElementById("breakeven").innerText = `${res.breakeven_years} Years`;
+            document.getElementById("breakeven").innerText = `${res.breakeven_years} Yrs`;
             document.getElementById("gain").innerText = utils.formatCurrency(res.total_gain_10y);
 
             if(myChart) myChart.destroy();
             
             const ctx = document.getElementById('roiChart').getContext('2d');
+            
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.font.family = "'Outfit', sans-serif";
+            
             myChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['Year 1', 'Year 3', 'Year 5'],
                     datasets: [{
-                        label: 'Projected Salary (INR)',
+                        label: 'Projected Base Salary (INR)',
                         data: [res.year1_salary, res.year3_salary, res.year5_salary],
-                        backgroundColor: 'rgba(37, 99, 235, 0.5)',
-                        borderColor: 'rgb(37, 99, 235)',
-                        borderWidth: 1
+                        backgroundColor: 'rgba(6, 182, 212, 0.4)',
+                        borderColor: 'rgb(6, 182, 212)',
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        hoverBackgroundColor: 'rgba(6, 182, 212, 0.8)'
                     }]
                 },
                 options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#f8fafc' } }
+                    },
                     scales: {
-                        y: { beginAtZero: true }
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
                     }
                 }
             });

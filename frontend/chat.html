@@ -9,33 +9,62 @@
     <script src="js/auth.js"></script>
     <script src="js/utils.js"></script>
     <script>auth.checkAuthAndRedirect();</script>
+    <style>
+        /* Specific chat tweaks for dark mode */
+        .bubble.ai {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(255,255,255,0.05);
+        }
+        .bubble.user {
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+        #chatInput {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+        }
+        #chatInput:focus {
+            background: rgba(0,0,0,0.5);
+            border-color: var(--primary);
+        }
+    </style>
 </head>
-<body style="background:var(--light);">
+<body>
 
-    <nav class="navbar" style="background: white; border-bottom: 1px solid #eee;">
-        <div class="logo"><a href="dashboard.html">← Back</a> &nbsp; <b style="font-size:1.2rem;">EduPath AI 🤖 <span style="color:var(--success); font-size:0.8em;">● Online</span></b></div>
+    <nav class="navbar">
+        <div class="logo"><a href="dashboard.html" style="color: var(--text-muted); padding-right:15px; border-right: 1px solid var(--glass-border);">← Back</a> &nbsp; <b style="font-size:1.4rem;">EduPath AI <span style="font-size:1.2rem">🤖</span></b></div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:10px; height:10px; border-radius:50%; background:var(--success); box-shadow: 0 0 10px var(--success);"></div>
+            <span style="font-size:0.9rem; font-weight:600; color:var(--text-muted);">Systems Online</span>
+        </div>
     </nav>
 
-    <div class="container chat-container" style="margin-top: 70px; max-width:800px; background:white; padding:0; box-shadow:0 0 20px rgba(0,0,0,0.05);">
+    <div class="container chat-container" style="margin-top: 100px; max-width:900px;">
         
-        <div class="chat-messages" id="chatBox">
-            <div class="text-center text-muted" style="margin-bottom:20px; font-size:0.9em;">Chat history is secured</div>
-            
-            <div class="bubble ai">
-                Hello! I'm EduPath AI. I can help you with university selection, visa processes, and education loan guidance. What would you like to know today?
+        <div class="card" style="flex-grow: 1; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+            <div class="chat-messages" id="chatBox">
+                <div class="text-center text-muted" style="margin-bottom:20px; font-size:0.85em; text-transform:uppercase; letter-spacing:1px; border-bottom: 1px solid var(--glass-border); padding-bottom:10px;">Secure Chat Session Initialized</div>
+                
+                <div class="bubble ai fade-in">
+                    <div style="font-size:0.8rem; color:var(--secondary); margin-bottom:5px; font-weight:600;">EduPath AI Core</div>
+                    Greetings, architect of the future. I am your personal AI mentor. Whether you need deep analysis on global universities, granular cost breakdowns, or strategic visa guidance, I am ready. What objective shall we tackle today?
+                </div>
             </div>
-        </div>
 
-        <div style="padding: 10px 20px; background:#fafafa; display:flex; gap:10px; overflow-x:auto; border-top:1px solid #eee;" id="suggestedChips">
-            <button class="btn btn-outline" style="padding:5px 15px; white-space:nowrap; border-radius:20px; font-size:0.9em;" onclick="sendMsg('Which country is best for MS CS? 🎓')">Which country is best for MS CS? 🎓</button>
-            <button class="btn btn-outline" style="padding:5px 15px; white-space:nowrap; border-radius:20px; font-size:0.9em;" onclick="sendMsg('How to get education loan in India? 💰')">How to get education loan? 💰</button>
-            <button class="btn btn-outline" style="padding:5px 15px; white-space:nowrap; border-radius:20px; font-size:0.9em;" onclick="sendMsg('What GPA do I need for US universities? 📊')">US University GPA? 📊</button>
-        </div>
+            <div style="padding: 15px 20px; background:rgba(0,0,0,0.2); display:flex; gap:10px; overflow-x:auto; border-top:1px solid var(--glass-border);" id="suggestedChips">
+                <button class="btn btn-outline" style="padding:8px 18px; white-space:nowrap; border-radius:20px; font-size:0.9em; border-color:rgba(255,255,255,0.1); color:var(--text-muted);" onclick="sendMsg('Which country is optimal for MS in CS considering ROI? 🎓')">Optimal country for MS CS? 🎓</button>
+                <button class="btn btn-outline" style="padding:8px 18px; white-space:nowrap; border-radius:20px; font-size:0.9em; border-color:rgba(255,255,255,0.1); color:var(--text-muted);" onclick="sendMsg('Break down the education loan process for Indian students. 💰')">Education loan process? 💰</button>
+                <button class="btn btn-outline" style="padding:8px 18px; white-space:nowrap; border-radius:20px; font-size:0.9em; border-color:rgba(255,255,255,0.1); color:var(--text-muted);" onclick="sendMsg('What exact profile metrics do Tier 1 US universities look for? 📊')">Tier 1 US Profile Metrics? 📊</button>
+            </div>
 
-        <form class="chat-input-area" id="chatForm">
-            <input type="text" id="chatInput" placeholder="Message EduPath AI..." style="margin:0; border:1px solid #ddd; border-radius:20px; padding:10px 20px; flex-grow:1;" autocomplete="off" required>
-            <button type="submit" class="btn btn-primary" style="border-radius:20px; padding:10px 20px;">Send</button>
-        </form>
+            <form class="chat-input-area" id="chatForm" style="border-radius:0; margin-bottom:0; border:none; border-top: 1px solid var(--glass-border); background:rgba(15,23,42,0.8);">
+                <input type="text" id="chatInput" placeholder="Initialize inquiry..." style="margin:0; border-radius:12px; padding:15px 20px; flex-grow:1; font-size:1.05rem;" autocomplete="off" required>
+                <button type="submit" class="btn btn-primary" style="border-radius:12px; padding:10px 30px; font-size:1.05rem;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -57,8 +86,14 @@
 
         function appendBubble(text, role) {
             const div = document.createElement("div");
-            div.className = `bubble ${role === 'user' ? 'user' : 'ai'}`;
-            div.innerHTML = text.replace(/\n/g, '<br>');
+            div.className = `bubble ${role === 'user' ? 'user' : 'ai'} fade-in`;
+            
+            if(role === 'ai') {
+                div.innerHTML = `<div style="font-size:0.8rem; color:var(--secondary); margin-bottom:5px; font-weight:600;">EduPath AI Core</div>` + text.replace(/\n/g, '<br>');
+            } else {
+                div.innerHTML = text.replace(/\n/g, '<br>');
+            }
+            
             chatBox.appendChild(div);
             scrollToBottom();
         }
@@ -85,9 +120,9 @@
             document.getElementById("suggestedChips").style.display = 'none';
 
             const typing = document.createElement("div");
-            typing.className = "bubble ai";
+            typing.className = "bubble ai fade-in";
             typing.id = "typingInd";
-            typing.innerHTML = "<i>Thinking...</i>";
+            typing.innerHTML = `<div style="font-size:0.8rem; color:var(--secondary); margin-bottom:5px; font-weight:600;">EduPath AI Core</div><span style="opacity:0.7; font-style:italic; display:flex; align-items:center; gap:8px;">Processing logic <span class="typing-dots">...</span></span>`;
             chatBox.appendChild(typing);
             scrollToBottom();
 
@@ -104,7 +139,7 @@
                 chatHistory.push({role: "user", message: msg});
                 chatHistory.push({role: "assistant", message: res.message});
             } else {
-                appendBubble("Sorry, I encountered an error. Please try again.", "ai");
+                appendBubble("Error in neural routing. Retrying connection...", "ai");
             }
         });
 
