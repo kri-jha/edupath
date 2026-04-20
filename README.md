@@ -10,7 +10,7 @@ EduPath AI is a premium, modern, AI-powered Unified Student Engagement Platform 
 
 ## Setup & Running Locally
 
-1. **Navigate to backend:**
+1. **Navigate to backend:*
 ```bash
 cd backend
 ```
