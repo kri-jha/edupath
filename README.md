@@ -1,4 +1,4 @@
-# EduPath AI
+# EduPath AII
 
 EduPath AI is a premium, modern, AI-powered Unified Student Engagement Platform for Indian students planning higher education abroad.
 
